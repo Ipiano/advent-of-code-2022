@@ -33,24 +33,39 @@ std::vector<std::vector<uint64_t>> read_all_input(std::istream& input)
     return result;
 }
 
+std::vector<uint64_t> sum_groups(const std::vector<std::vector<uint64_t>>& data)
+{
+    std::vector<uint64_t> result(data.size(), 0);
+
+    std::transform(
+        data.begin(), data.end(), result.begin(), [](const std::vector<uint64_t>& group) {
+            return std::accumulate(group.begin(), group.end(), 0ULL);
+        });
+
+    return result;
+}
+
 uint64_t get_max_sum(const std::vector<std::vector<uint64_t>>& data)
 {
-    uint64_t max_sum = 0;
-    std::for_each(data.begin(), data.end(), [&max_sum](const std::vector<uint64_t>& group) {
-        max_sum = std::max<uint64_t>(max_sum, std::accumulate(group.begin(), group.end(), 0ULL));
-    });
-    return max_sum;
+    auto summed_groups = sum_groups(data);
+    std::sort(summed_groups.rbegin(), summed_groups.rend());
+    return summed_groups.front();
 }
 }  // namespace day_1_impl
 
 void day_1(std::istream& input, std::ostream& output)
 {
-    std::vector<std::vector<uint64_t>> input_groups = day_1_impl::read_all_input(input);
+    auto input_groups = day_1_impl::read_all_input(input);
     output << day_1_impl::get_max_sum(input_groups);
 }
 
 void day_1_adv(std::istream& input, std::ostream& output)
 {
+    auto input_groups = day_1_impl::read_all_input(input);
+    auto summed_groups = day_1_impl::sum_groups(input_groups);
+    std::sort(summed_groups.rbegin(), summed_groups.rend());
+
+    output << summed_groups[0] + summed_groups[1] + summed_groups[2];
 }
 
 TEST(Day1, InputNumberGroups)
@@ -71,7 +86,13 @@ TEST(Day1, MaxGroupSum)
     ASSERT_EQ(day_1_impl::get_max_sum({{100, 200}, {200, 300, 400}, {500}}), 900);
 }
 
-TEST(Day1, Example)
+TEST(Day1, SumGroups)
+{
+    ASSERT_EQ(day_1_impl::sum_groups({{100, 200}, {200, 300, 400}, {500}}),
+              std::vector<uint64_t>({300, 900, 500}));
+}
+
+TEST(Day1, ExampleRegular)
 {
     const static char* INPUT_DATA = R"in(1000
 2000
@@ -94,4 +115,29 @@ TEST(Day1, Example)
     day_1(ss_in, ss_out);
 
     EXPECT_EQ(ss_out.str(), "24000");
+}
+
+TEST(Day1, ExampleAdvanced)
+{
+    const static char* INPUT_DATA = R"in(1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_1_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "45000");
 }
