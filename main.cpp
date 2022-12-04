@@ -38,5 +38,7 @@ int main(int argc, char** argv)
 
     PROCESS_FN(*in, *out);
 
+    *out << std::endl;
+
     return 0;
 }
