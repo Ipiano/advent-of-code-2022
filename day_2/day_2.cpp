@@ -33,6 +33,9 @@ constexpr static std::array<uint8_t, 3> SCORES{{1, 2, 3}};
 // WINNER[x] is the play that beats X
 constexpr static std::array<Play, 3> WINNER{{Play::PAPER, Play::SCISSORS, Play::ROCK}};
 
+// LOSER[x] is the play that loses to X
+constexpr static std::array<Play, 3> LOSER{{Play::SCISSORS, Play::ROCK, Play::PAPER}};
+
 Play get_play(char c)
 {
     switch (c)
@@ -82,6 +85,19 @@ std::vector<ResultGame> read_all_input(std::istream& input)
 Game convert_input_result_is_play(ResultGame game)
 {
     return {game.first, static_cast<Play>(game.second)};
+}
+
+Game convert_input_calculate_play(ResultGame game)
+{
+    switch (game.second)
+    {
+    case Result::WIN:
+        return {game.first, WINNER[static_cast<size_t>(game.first)]};
+    case Result::TIE:
+        return {game.first, game.first};
+    case Result::LOSE:
+        return {game.first, LOSER[static_cast<size_t>(game.first)]};
+    }
 }
 
 uint8_t get_score(Game g)
@@ -144,6 +160,15 @@ void day_2(std::istream& input, std::ostream& output)
 
 void day_2_adv(std::istream& input, std::ostream& output)
 {
+    const auto games_in = day_2_impl::read_all_input(input);
+
+    std::vector<day_2_impl::Game> games(games_in.size());
+    std::transform(
+        games_in.begin(), games_in.end(), games.begin(), &day_2_impl::convert_input_calculate_play);
+
+    output << std::accumulate(games.begin(), games.end(), 0, [](uint64_t sum, day_2_impl::Game g) {
+        return sum + day_2_impl::get_score(g);
+    });
 }
 
 TEST(Day2, Example)
@@ -169,5 +194,7 @@ C Z)in";
     std::stringstream ss_in, ss_out;
     ss_in << INPUT_DATA;
 
-    // day_2_adv(ss_in, ss_out);
+    day_2_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "12");
 }
