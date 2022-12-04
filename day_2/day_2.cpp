@@ -17,6 +17,14 @@ enum class Play
     SCISSORS = 2,
 };
 
+enum class Result
+{
+    LOSE,
+    TIE,
+    WIN
+};
+
+using ResultGame = std::pair<Play, Result>;
 using Game = std::pair<Play, Play>;
 
 // Score gained from each play
@@ -30,34 +38,50 @@ Play get_play(char c)
     switch (c)
     {
     case 'A':
-    case 'X':
         return Play::ROCK;
     case 'B':
-    case 'Y':
         return Play::PAPER;
     case 'C':
-    case 'Z':
         return Play::SCISSORS;
     }
-    throw std::runtime_error("Unexpected input: " + std::string(1, c));
+    throw std::runtime_error("Unexpected play input: " + std::string(1, c));
 }
 
-std::vector<Game> read_all_input(std::istream& input)
+Result get_result(char c)
 {
-    std::vector<Game> result;
-
-    std::string them, us;
-    while (input >> them >> us)
+    switch (c)
     {
-        if (them.size() != 1 || us.size() != 1)
+    case 'X':
+        return Result::LOSE;
+    case 'Y':
+        return Result::TIE;
+    case 'Z':
+        return Result::WIN;
+    }
+    throw std::runtime_error("Unexpected result input: " + std::string(1, c));
+}
+
+std::vector<ResultGame> read_all_input(std::istream& input)
+{
+    std::vector<ResultGame> result;
+
+    std::string play, game_result;
+    while (input >> play >> game_result)
+    {
+        if (play.size() != 1 || game_result.size() != 1)
         {
-            throw std::runtime_error("Unexpected input: " + them + " " + us);
+            throw std::runtime_error("Unexpected input: " + play + " " + game_result);
         }
 
-        result.emplace_back(get_play(them[0]), get_play(us[0]));
+        result.emplace_back(get_play(play[0]), get_result(game_result[0]));
     }
 
     return result;
+}
+
+Game convert_input_result_is_play(ResultGame game)
+{
+    return {game.first, static_cast<Play>(game.second)};
 }
 
 uint8_t get_score(Game g)
@@ -85,10 +109,10 @@ TEST(Day2, InputGames)
     auto games = day_2_impl::read_all_input(ss);
 
     ASSERT_EQ(games.size(), 4U);
-    EXPECT_EQ(games[0], Game(Play::ROCK, Play::ROCK));
-    EXPECT_EQ(games[1], Game(Play::PAPER, Play::PAPER));
-    EXPECT_EQ(games[2], Game(Play::SCISSORS, Play::SCISSORS));
-    EXPECT_EQ(games[3], Game(Play::ROCK, Play::SCISSORS));
+    EXPECT_EQ(games[0], ResultGame(Play::ROCK, Result::LOSE));
+    EXPECT_EQ(games[1], ResultGame(Play::PAPER, Result::TIE));
+    EXPECT_EQ(games[2], ResultGame(Play::SCISSORS, Result::WIN));
+    EXPECT_EQ(games[3], ResultGame(Play::ROCK, Result::WIN));
 }
 
 TEST(Day2, Scoring)
@@ -107,7 +131,11 @@ TEST(Day2, Scoring)
 
 void day_2(std::istream& input, std::ostream& output)
 {
-    const auto games = day_2_impl::read_all_input(input);
+    const auto games_in = day_2_impl::read_all_input(input);
+
+    std::vector<day_2_impl::Game> games(games_in.size());
+    std::transform(
+        games_in.begin(), games_in.end(), games.begin(), &day_2_impl::convert_input_result_is_play);
 
     output << std::accumulate(games.begin(), games.end(), 0, [](uint64_t sum, day_2_impl::Game g) {
         return sum + day_2_impl::get_score(g);
