@@ -4,6 +4,7 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <gtest/gtest.h>
@@ -50,6 +51,41 @@ char get_mismatch(const Rucksack& sack)
         }
     }
     throw std::runtime_error("input has no discprepancy");
+}
+
+char get_badge(const Rucksack& r1, const Rucksack& r2, const Rucksack& r3)
+{
+    std::unordered_map<char, uint8_t> item_counts;
+
+    auto count_pocket = [&](const std::unordered_set<char>& p) {
+        for (const auto c : p)
+        {
+            if (item_counts.count(c) == 0)
+            {
+                item_counts[c] = 0;
+            }
+
+            item_counts[c]++;
+        }
+    };
+
+    auto count_items = [&](const Rucksack& r) {
+        count_pocket(r.first);
+        count_pocket(r.second);
+    };
+
+    count_items(r1);
+    count_items(r2);
+    count_items(r3);
+
+    for (const auto& item_and_count : item_counts)
+    {
+        if (item_and_count.second == 3)
+        {
+            return item_and_count.first;
+        }
+    }
+    throw std::runtime_error("no badge found");
 }
 
 TEST(Day3, ReadInput)
@@ -104,6 +140,15 @@ void day_3(std::istream& input, std::ostream& output)
 
 void day_3_adv(std::istream& input, std::ostream& output)
 {
+    auto sacks = day_3_impl::read_all_input(input);
+
+    uint64_t badge_sum = 0;
+    for (auto it = sacks.begin(); it != sacks.end(); it += 3)
+    {
+        badge_sum += day_3_impl::get_priority(day_3_impl::get_badge(*it, *(it + 1), *(it + 2)));
+    }
+
+    output << badge_sum;
 }
 
 TEST(Day3, Example)
@@ -135,7 +180,7 @@ CrZsJsPPZsGzwwsLwLmpwMDw)in";
     std::stringstream ss_in, ss_out;
     ss_in << INPUT_DATA;
 
-    // day_3_adv(ss_in, ss_out);
+    day_3_adv(ss_in, ss_out);
 
-    // EXPECT_EQ(ss_out.str(), "12");
+    EXPECT_EQ(ss_out.str(), "70");
 }
