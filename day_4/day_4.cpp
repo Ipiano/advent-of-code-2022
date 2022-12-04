@@ -39,6 +39,11 @@ bool does_contain(Range l, Range r)
     return l.first >= r.first && l.second <= r.second;
 }
 
+bool does_overlap(Range l, Range r)
+{
+    return !(l.second < r.first || l.first > r.second);
+}
+
 TEST(Day4, ReadInput)
 {
     std::stringstream ss;
@@ -66,6 +71,13 @@ void day_4(std::istream& input, std::ostream& output)
 
 void day_4_adv(std::istream& input, std::ostream& output)
 {
+    using namespace day_4_impl;
+
+    const auto teams = read_all_input(input);
+
+    output << std::accumulate(teams.begin(), teams.end(), 0ULL, [](uint64_t sum, Team t) {
+        return sum + ((does_overlap(t.first, t.second) || does_overlap(t.second, t.first)) ? 1 : 0);
+    });
 }
 
 TEST(Day4, Example)
@@ -97,7 +109,7 @@ TEST(Day4, ExampleAdvanced)
     std::stringstream ss_in, ss_out;
     ss_in << INPUT_DATA;
 
-    // day_4_adv(ss_in, ss_out);
+    day_4_adv(ss_in, ss_out);
 
-    // EXPECT_EQ(ss_out.str(), "70");
+    EXPECT_EQ(ss_out.str(), "4");
 }
