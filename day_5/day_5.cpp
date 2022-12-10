@@ -128,6 +128,26 @@ Stacks execute_plan(Stacks input, const std::vector<Command>& commands)
     return input;
 }
 
+Stacks execute_plan_multimove(Stacks input, const std::vector<Command>& commands)
+{
+    Stack scratch;
+    for (const auto& cmd : commands)
+    {
+        for (size_t i = 0; i < cmd.count; ++i)
+        {
+            scratch.push(input[cmd.index_from].top());
+            input[cmd.index_from].pop();
+        }
+
+        while (!scratch.empty())
+        {
+            input[cmd.index_to].push(scratch.top());
+            scratch.pop();
+        }
+    }
+    return input;
+}
+
 TEST(Day5, ReadInput)
 {
     const static char* INPUT_DATA = R"in(    [D]
@@ -179,6 +199,17 @@ void day_5(std::istream& input, std::ostream& output)
 void day_5_adv(std::istream& input, std::ostream& output)
 {
     using namespace day_5_impl;
+
+    const auto instructions = read_all_input(input);
+    const auto result = execute_plan_multimove(instructions.first, instructions.second);
+
+    for (const auto& s : result)
+    {
+        if (!s.empty())
+        {
+            output << s.top();
+        }
+    }
 }
 
 TEST(Day5, Example)
@@ -216,7 +247,7 @@ move 1 from 1 to 2)in";
     std::stringstream ss_in, ss_out;
     ss_in << INPUT_DATA;
 
-    // day_5_adv(ss_in, ss_out);
+    day_5_adv(ss_in, ss_out);
 
-    // EXPECT_EQ(ss_out.str(), "CMZ");
+    EXPECT_EQ(ss_out.str(), "MCD");
 }
