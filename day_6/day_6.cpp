@@ -18,14 +18,14 @@ template <class IteratorT> bool unique(IteratorT begin, IteratorT end)
     return true;
 }
 
-template <class IteratorT> size_t find_token(IteratorT begin, IteratorT end)
+template <class IteratorT> size_t find_token(IteratorT begin, IteratorT end, size_t token_size)
 {
     auto curr = begin;
-    while (curr + 4 < end)
+    while (curr + token_size < end)
     {
-        if (day_6_impl::unique(curr, curr + 4))
+        if (day_6_impl::unique(curr, curr + token_size))
         {
-            return curr + 4 - begin;
+            return curr + token_size - begin;
         }
         ++curr;
     }
@@ -39,7 +39,7 @@ void day_6(std::istream& input, std::ostream& output)
 
     std::string line;
     std::getline(input, line);
-    output << find_token(line.begin(), line.end());
+    output << find_token(line.begin(), line.end(), 4);
 }
 
 void day_6_adv(std::istream& input, std::ostream& output)
@@ -59,6 +59,6 @@ TEST(Day6, Examples)
 
     for (const auto& test : CASES)
     {
-        EXPECT_EQ(find_token(test.first.begin(), test.first.end()), test.second);
+        EXPECT_EQ(find_token(test.first.begin(), test.first.end(), 4), test.second);
     }
 }
