@@ -45,6 +45,10 @@ void day_6(std::istream& input, std::ostream& output)
 void day_6_adv(std::istream& input, std::ostream& output)
 {
     using namespace day_6_impl;
+
+    std::string line;
+    std::getline(input, line);
+    output << find_token(line.begin(), line.end(), 14);
 }
 
 TEST(Day6, Examples)
@@ -60,5 +64,21 @@ TEST(Day6, Examples)
     for (const auto& test : CASES)
     {
         EXPECT_EQ(find_token(test.first.begin(), test.first.end(), 4), test.second);
+    }
+}
+
+TEST(Day6, ExamplesAdvanced)
+{
+    using namespace day_6_impl;
+
+    const std::vector<std::pair<std::string, size_t>> CASES {{"mjqjpqmgbljsphdztnvjfqwrcgsmlb", 19},
+                                                             {"bvwbjplbgvbhsrlpgdmjqwftvncz", 23},
+                                                             {"nppdvjthqldpwncqszvftbrmjlhg", 23},
+                                                             {"nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", 29},
+                                                             {"zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", 26}};
+
+    for (const auto& test : CASES)
+    {
+        EXPECT_EQ(find_token(test.first.begin(), test.first.end(), 14), test.second);
     }
 }
