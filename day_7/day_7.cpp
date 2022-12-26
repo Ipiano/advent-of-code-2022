@@ -335,6 +335,23 @@ void day_7(std::istream& input, std::ostream& output)
 void day_7_adv(std::istream& input, std::ostream& output)
 {
     using namespace day_7_impl;
+
+    const auto commands = read_input(input);
+    const auto tree     = build_tree(commands);
+
+    size_t required_space = 30000000 - (70000000 - tree->size());
+
+    size_t smallest_match = 70000000;
+    visit(*tree,
+          [&](const FileTree& ft)
+          {
+              if (ft.size() >= required_space && ft.size() < smallest_match)
+              {
+                  smallest_match = ft.size();
+              }
+          });
+
+    output << smallest_match;
 }
 
 TEST(Day7, Example)
@@ -369,4 +386,38 @@ $ ls
     day_7(ss_in, ss_out);
 
     EXPECT_EQ(ss_out.str(), "95437");
+}
+
+TEST(Day7, ExampleAdvanced)
+{
+    const static char* INPUT_DATA = R"in($ cd /
+$ ls
+dir a
+14848514 b.txt
+8504156 c.dat
+dir d
+$ cd a
+$ ls
+dir e
+29116 f
+2557 g
+62596 h.lst
+$ cd e
+$ ls
+584 i
+$ cd ..
+$ cd ..
+$ cd d
+$ ls
+4060174 j
+8033020 d.log
+5626152 d.ext
+7214296 k)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_7_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "24933642");
 }
