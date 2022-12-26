@@ -140,6 +140,36 @@ size_t count_visible_trees(const Forest& f)
                            [](size_t x, const std::vector<Tree>& row)
                            { return x + std::count_if(row.begin(), row.end(), [](const Tree& t) { return t.second; }); });
 }
+
+size_t scenic_score(const Forest& f, size_t y, size_t x)
+{
+    // score 0 on the border - important to shortcut so checks below don't
+    // go out of bounds
+    if (x == 0 || y == 0 || x == f.size() - 1 || y == f.size() - 1)
+    {
+        return 0;
+    }
+
+    size_t score_up    = 1;
+    size_t score_down  = 1;
+    size_t score_left  = 1;
+    size_t score_right = 1;
+
+    size_t this_height = f[y][x].first;
+
+    for (size_t i = x + 1; i < f.size() - 1 && f[y][i].first < this_height; ++i, ++score_right)
+        ;
+
+    for (size_t i = 1; i < x && f[y][x - i].first < this_height; ++i, ++score_left)
+        ;
+
+    for (size_t i = y + 1; i < f.size() - 1 && f[i][x].first < this_height; ++i, ++score_down)
+        ;
+
+    for (size_t i = 1; i < y && f[y - i][x].first < this_height; ++i, ++score_up)
+        ;
+    return score_left * score_right * score_up * score_down;
+}
 }
 
 void day_8(std::istream& in, std::ostream& out)
@@ -154,6 +184,20 @@ void day_8(std::istream& in, std::ostream& out)
 
 void day_8_adv(std::istream& in, std::ostream& out)
 {
+    using namespace day_8_impl;
+
+    auto forest = read_input(in);
+
+    size_t best_score = 0;
+    for (size_t i = 0; i < forest.size(); ++i)
+    {
+        for (size_t j = 0; j < forest.size(); ++j)
+        {
+            best_score = std::max(best_score, scenic_score(forest, i, j));
+        }
+    }
+
+    out << best_score;
 }
 
 TEST(Day8, Example)
@@ -170,4 +214,20 @@ TEST(Day8, Example)
     day_8(ss_in, ss_out);
 
     EXPECT_EQ(ss_out.str(), "21");
+}
+
+TEST(Day8, ExampleAdvanced)
+{
+    const static char* INPUT_DATA = R"in(30373
+25512
+65332
+33549
+35390)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_8_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "8");
 }
