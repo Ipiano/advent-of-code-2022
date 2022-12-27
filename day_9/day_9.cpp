@@ -49,9 +49,6 @@ std::vector<Command> read_input(std::istream& in)
 
 void step(Direction d, int& head_x, int& head_y, int& tail_x, int& tail_y)
 {
-    auto old_head_x = head_x;
-    auto old_head_y = head_y;
-
     // Move the head
     switch (d)
     {
@@ -72,8 +69,11 @@ void step(Direction d, int& head_x, int& head_y, int& tail_x, int& tail_y)
     // If the tail is too far away, move it
     if (std::abs(head_x - tail_x) >= 2 || std::abs(head_y - tail_y) >= 2)
     {
-        tail_x = old_head_x;
-        tail_y = old_head_y;
+        if (head_x != tail_x)
+            tail_x += (head_x - tail_x) / (std::abs(head_x - tail_x));
+
+        if (head_y != tail_y)
+            tail_y += (head_y - tail_y) / std::abs(head_y - tail_y);
     }
 }
 
@@ -131,4 +131,44 @@ R 2
     day_9(ss_in, ss_out);
 
     EXPECT_EQ(ss_out.str(), "13");
+}
+
+TEST(DISABLED_Day9, ExampleAdvanced1)
+{
+    const static char* INPUT_DATA = R"in(R 4
+U 4
+L 3
+D 1
+R 4
+D 1
+L 5
+R 2
+)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_9_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "1");
+}
+
+TEST(DISABLED_Day9, ExampleAdvanced2)
+{
+    const static char* INPUT_DATA = R"in(R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20
+)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_9_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "36");
 }
