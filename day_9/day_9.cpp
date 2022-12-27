@@ -16,6 +16,7 @@ enum class Direction
 
 using Command    = std::pair<Direction, size_t>;
 using Coordinate = std::pair<int, int>;
+using Rope       = std::vector<Coordinate>;
 
 std::vector<Command> read_input(std::istream& in)
 {
@@ -83,23 +84,24 @@ Coordinate update(Coordinate head, Coordinate tail)
     return tail;
 }
 
-size_t count_tail_locations(const std::vector<Command>& commands)
+size_t count_tail_locations(const std::vector<Command>& commands, size_t rope_length)
 {
+    Rope r(rope_length, {0, 0});
+
     std::set<Coordinate> tail_locations;
-
-    Coordinate head {0, 0};
-    Coordinate tail = head;
-
-    tail_locations.insert(tail);
+    tail_locations.insert(r.back());
 
     for (const auto& c : commands)
     {
         for (size_t i = 0; i < c.second; ++i)
         {
-            head = step(c.first, head);
-            tail = update(head, tail);
+            r.front() = step(c.first, r.front());
+            for (size_t j = 1; j < r.size(); ++j)
+            {
+                r[j] = update(r[j - 1], r[j]);
+            }
 
-            tail_locations.emplace(tail);
+            tail_locations.emplace(r.back());
         }
     }
 
@@ -113,7 +115,7 @@ void day_9(std::istream& in, std::ostream& out)
 
     const auto commands = read_input(in);
 
-    out << count_tail_locations(commands);
+    out << count_tail_locations(commands, 2);
 }
 
 void day_9_adv(std::istream& in, std::ostream& out)
