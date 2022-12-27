@@ -121,6 +121,10 @@ void day_9(std::istream& in, std::ostream& out)
 void day_9_adv(std::istream& in, std::ostream& out)
 {
     using namespace day_9_impl;
+
+    const auto commands = read_input(in);
+
+    out << count_tail_locations(commands, 10);
 }
 
 TEST(Day9, Example)
@@ -143,7 +147,7 @@ R 2
     EXPECT_EQ(ss_out.str(), "13");
 }
 
-TEST(DISABLED_Day9, ExampleAdvanced1)
+TEST(Day9, ExampleAdvanced1)
 {
     const static char* INPUT_DATA = R"in(R 4
 U 4
@@ -163,7 +167,7 @@ R 2
     EXPECT_EQ(ss_out.str(), "1");
 }
 
-TEST(DISABLED_Day9, ExampleAdvanced2)
+TEST(Day9, ExampleAdvanced2)
 {
     const static char* INPUT_DATA = R"in(R 5
 U 8
