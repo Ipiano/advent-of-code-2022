@@ -19,7 +19,7 @@ struct Monkey
     ThrowFn throw_fn;
 };
 
-WorryFn make_transform(const std::string& operation)
+template <class PostXForm> WorryFn make_transform(const std::string& operation, PostXForm p)
 {
     char op;
     char arg_str[5] = {};
@@ -29,12 +29,12 @@ WorryFn make_transform(const std::string& operation)
 
     if (op == '+')
     {
-        return arg ? WorryFn([arg](size_t x) { return (x + arg) / 3; }) : WorryFn([](size_t x) { return (x + x) / 3; });
+        return arg ? WorryFn([arg, p](size_t x) { return p(x + arg); }) : WorryFn([p](size_t x) { return p(x + x); });
     }
     else
     {
         assert(op == '*');
-        return arg ? WorryFn([arg](size_t x) { return (x * arg) / 3; }) : WorryFn([](size_t x) { return (x * x) / 3; });
+        return arg ? WorryFn([arg, p](size_t x) { return p(x * arg); }) : WorryFn([p](size_t x) { return p(x * x); });
     }
 }
 
@@ -64,7 +64,7 @@ std::vector<size_t> parse_items(const std::string& item_list)
     return result;
 }
 
-std::vector<Monkey> read_input(std::istream& in)
+template <class PostXForm> std::vector<Monkey> read_input(std::istream& in, PostXForm p)
 {
     std::vector<Monkey> monkeys;
 
@@ -76,7 +76,7 @@ std::vector<Monkey> read_input(std::istream& in)
 
         Monkey m;
         m.items    = parse_items(monkey_data[1]);
-        m.worry_fn = make_transform(monkey_data[2]);
+        m.worry_fn = make_transform(monkey_data[2], p);
         m.throw_fn = make_evaluation(monkey_data[3], monkey_data[4], monkey_data[5]);
 
         monkeys.push_back(std::move(m));
@@ -113,7 +113,7 @@ void day_11(std::istream& in, std::ostream& out)
 {
     using namespace day_11_impl;
 
-    auto monkeys = read_input(in);
+    auto monkeys = read_input(in, [](size_t x) { return x / 3; });
     simulate(monkeys, 20);
 
     std::sort(monkeys.begin(), monkeys.end(), [](const Monkey& l, const Monkey& r) { return l.total_items > r.total_items; });
