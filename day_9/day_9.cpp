@@ -47,7 +47,7 @@ std::vector<Command> read_input(std::istream& in)
     return result;
 }
 
-void step(Direction d, int& head_x, int& head_y, int& tail_x, int& tail_y)
+void step(Direction d, int& head_x, int& head_y)
 {
     // Move the head
     switch (d)
@@ -65,7 +65,10 @@ void step(Direction d, int& head_x, int& head_y, int& tail_x, int& tail_y)
         head_x++;
         break;
     }
+}
 
+void update(int head_x, int head_y, int& tail_x, int& tail_y)
+{
     // If the tail is too far away, move it
     if (std::abs(head_x - tail_x) >= 2 || std::abs(head_y - tail_y) >= 2)
     {
@@ -90,7 +93,9 @@ size_t count_tail_locations(const std::vector<Command>& commands)
     {
         for (size_t i = 0; i < c.second; ++i)
         {
-            step(c.first, head_x, head_y, tail_x, tail_y);
+            step(c.first, head_x, head_y);
+            update(head_x, head_y, tail_x, tail_y);
+
             tail_locations.emplace(tail_x, tail_y);
         }
     }
