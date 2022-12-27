@@ -124,6 +124,13 @@ void day_11(std::istream& in, std::ostream& out)
 void day_11_adv(std::istream& in, std::ostream& out)
 {
     using namespace day_11_impl;
+
+    auto monkeys = read_input(in, [](size_t x) { return x % (2 * 3 * 5 * 7 * 11 * 13 * 17 * 19 * 23); });
+    simulate(monkeys, 10000);
+
+    std::sort(monkeys.begin(), monkeys.end(), [](const Monkey& l, const Monkey& r) { return l.total_items > r.total_items; });
+
+    out << (monkeys[0].total_items * monkeys[1].total_items);
 }
 
 TEST(Day11, Example)
@@ -163,4 +170,43 @@ Monkey 3:
     day_11(ss_in, ss_out);
 
     EXPECT_EQ(ss_out.str(), "10605");
+}
+
+TEST(Day11, ExampleAdvanced)
+{
+    const static char* INPUT_DATA = R"in(Monkey 0:
+  Starting items: 79, 98
+  Operation: new = old * 19
+  Test: divisible by 23
+    If true: throw to monkey 2
+    If false: throw to monkey 3
+
+Monkey 1:
+  Starting items: 54, 65, 75, 74
+  Operation: new = old + 6
+  Test: divisible by 19
+    If true: throw to monkey 2
+    If false: throw to monkey 0
+
+Monkey 2:
+  Starting items: 79, 60, 97
+  Operation: new = old * old
+  Test: divisible by 13
+    If true: throw to monkey 1
+    If false: throw to monkey 3
+
+Monkey 3:
+  Starting items: 74
+  Operation: new = old + 3
+  Test: divisible by 17
+    If true: throw to monkey 0
+    If false: throw to monkey 1
+)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_11_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "2713310158");
 }
