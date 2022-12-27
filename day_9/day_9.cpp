@@ -14,7 +14,8 @@ enum class Direction
     RIGHT
 };
 
-using Command = std::pair<Direction, size_t>;
+using Command    = std::pair<Direction, size_t>;
+using Coordinate = std::pair<int, int>;
 
 std::vector<Command> read_input(std::istream& in)
 {
@@ -47,56 +48,58 @@ std::vector<Command> read_input(std::istream& in)
     return result;
 }
 
-void step(Direction d, int& head_x, int& head_y)
+Coordinate step(Direction d, Coordinate start)
 {
     // Move the head
     switch (d)
     {
     case Direction::UP:
-        head_y++;
+        start.second++;
         break;
     case Direction::DOWN:
-        head_y--;
+        start.second--;
         break;
     case Direction::LEFT:
-        head_x--;
+        start.first--;
         break;
     case Direction::RIGHT:
-        head_x++;
+        start.first++;
         break;
     }
+    return start;
 }
 
-void update(int head_x, int head_y, int& tail_x, int& tail_y)
+Coordinate update(Coordinate head, Coordinate tail)
 {
     // If the tail is too far away, move it
-    if (std::abs(head_x - tail_x) >= 2 || std::abs(head_y - tail_y) >= 2)
+    if (std::abs(head.first - tail.first) >= 2 || std::abs(head.second - tail.second) >= 2)
     {
-        if (head_x != tail_x)
-            tail_x += (head_x - tail_x) / (std::abs(head_x - tail_x));
+        if (head.first != tail.first)
+            tail.first += (head.first - tail.first) / (std::abs(head.first - tail.first));
 
-        if (head_y != tail_y)
-            tail_y += (head_y - tail_y) / std::abs(head_y - tail_y);
+        if (head.second != tail.second)
+            tail.second += (head.second - tail.second) / std::abs(head.second - tail.second);
     }
+    return tail;
 }
 
 size_t count_tail_locations(const std::vector<Command>& commands)
 {
-    std::set<std::pair<int, int>> tail_locations;
+    std::set<Coordinate> tail_locations;
 
-    int head_x = 0, head_y = 0;
-    int tail_x = 0, tail_y = 0;
+    Coordinate head {0, 0};
+    Coordinate tail = head;
 
-    tail_locations.emplace(tail_x, tail_y);
+    tail_locations.insert(tail);
 
     for (const auto& c : commands)
     {
         for (size_t i = 0; i < c.second; ++i)
         {
-            step(c.first, head_x, head_y);
-            update(head_x, head_y, tail_x, tail_y);
+            head = step(c.first, head);
+            tail = update(head, tail);
 
-            tail_locations.emplace(tail_x, tail_y);
+            tail_locations.emplace(tail);
         }
     }
 
