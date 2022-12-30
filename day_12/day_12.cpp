@@ -157,6 +157,19 @@ std::vector<Location> bfs(const Mountain& graph, Location start, Location end)
 
     return path;
 }
+
+void print_solution(Mountain m, const std::vector<Location>& path)
+{
+    std::unordered_set<Location, LocationHash> visited {path.begin(), path.end()};
+
+    for (size_t i = 0; i < m.size(); ++i)
+        for (size_t j = 0; j < m[i].size(); ++j)
+            if (visited.count({i, j}) == 0)
+                m[i][j] = '.';
+
+    for (const auto& l : m)
+        std::cout << l << std::endl;
+}
 }
 
 void day_12(std::istream& in, std::ostream& out)
@@ -168,15 +181,7 @@ void day_12(std::istream& in, std::ostream& out)
     std::tie(m, start, end) = read_input(in);
 
     auto path = bfs(m, start, end);
-    std::unordered_set<Location, LocationHash> visited {path.begin(), path.end()};
-
-    for (size_t i = 0; i < m.size(); ++i)
-        for (size_t j = 0; j < m[i].size(); ++j)
-            if (visited.count({i, j}) == 0)
-                m[i][j] = '.';
-
-    for (const auto& l : m)
-        std::cout << l << std::endl;
+    print_solution(m, path);
 
     out << path.size() - 1;
 }
