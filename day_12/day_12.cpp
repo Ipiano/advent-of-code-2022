@@ -102,14 +102,13 @@ std::pair<std::array<Location, 4>, size_t> adjacent_nodes(const Mountain& graph,
     return {result_nodes, result_size};
 }
 
-size_t bfs_distance(const Mountain& graph, Location start, Location end)
+std::vector<Location> bfs(const Mountain& graph, Location start, Location end)
 {
-    size_t result_distance = 0;
+    std::unordered_map<Location, Location, LocationHash> steps_from;
 
-    std::unordered_set<Location, LocationHash> visited;
     std::queue<Location> visit_nodes;
     visit_nodes.push(start);
-    visited.insert(start);
+    steps_from.emplace(start, start);
 
     while (!visit_nodes.empty())
     {
@@ -117,32 +116,42 @@ size_t bfs_distance(const Mountain& graph, Location start, Location end)
 
         for (; this_round_count > 0; --this_round_count)
         {
-            auto next = visit_nodes.front();
+            auto current = visit_nodes.front();
             visit_nodes.pop();
 
-            if (next == end)
+            if (current == end)
             {
-                return result_distance;
+                visit_nodes = {};
+                break;
             }
 
             std::array<Location, 4> adjacent_list;
             size_t adjacent_count;
-            std::tie(adjacent_list, adjacent_count) = adjacent_nodes(graph, next);
+            std::tie(adjacent_list, adjacent_count) = adjacent_nodes(graph, current);
 
             for (auto it = adjacent_list.begin(); it < adjacent_list.begin() + adjacent_count; ++it)
             {
                 auto adjacent = *it;
-                if (visited.insert(adjacent).second)
+                if (steps_from.emplace(adjacent, current).second)
                 {
                     visit_nodes.push(adjacent);
                 }
             }
         }
-
-        result_distance++;
     }
 
-    return result_distance;
+    std::vector<Location> path;
+    path.reserve(visit_nodes.size());
+
+    path.push_back(end);
+    while (path.back() != start)
+    {
+        path.push_back(steps_from[path.back()]);
+    }
+
+    std::reverse(path.begin(), path.end());
+
+    return path;
 }
 }
 
@@ -154,7 +163,18 @@ void day_12(std::istream& in, std::ostream& out)
     Location start, end;
     std::tie(m, start, end) = read_input(in);
 
-    out << bfs_distance(m, start, end);
+    auto path = bfs(m, start, end);
+    std::unordered_set<Location, LocationHash> visited {path.begin(), path.end()};
+
+    for (size_t i = 0; i < m.size(); ++i)
+        for (size_t j = 0; j < m[i].size(); ++j)
+            if (visited.count({i, j}) == 0)
+                m[i][j] = '.';
+
+    for (const auto& l : m)
+        std::cout << l << std::endl;
+
+    out << path.size() - 1;
 }
 
 void day_12_adv(std::istream& in, std::ostream& out)
