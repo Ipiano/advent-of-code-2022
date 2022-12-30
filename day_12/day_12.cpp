@@ -1,6 +1,8 @@
 #include <iostream>
 #include <queue>
 #include <unordered_set>
+#include <cassert>
+
 #include <gtest/gtest.h>
 
 namespace day_12_impl
@@ -139,6 +141,8 @@ std::vector<Location> bfs(const Mountain& graph, Location start, Location end)
             }
         }
     }
+
+    assert(steps_from.count(end) != 0);
 
     std::vector<Location> path;
     path.reserve(visit_nodes.size());
