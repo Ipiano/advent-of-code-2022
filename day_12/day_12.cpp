@@ -104,13 +104,17 @@ std::pair<std::array<Location, 4>, size_t> adjacent_nodes(const Mountain& graph,
     return {result_nodes, result_size};
 }
 
-std::vector<Location> bfs(const Mountain& graph, Location start, Location end)
+std::vector<Location> bfs(const Mountain& graph, std::vector<Location> starts, Location end)
 {
     std::unordered_map<Location, Location, LocationHash> steps_from;
 
     std::queue<Location> visit_nodes;
-    visit_nodes.push(start);
-    steps_from.emplace(start, start);
+
+    for (const auto s : starts)
+    {
+        visit_nodes.push(s);
+        steps_from.emplace(s, s);
+    }
 
     while (!visit_nodes.empty())
     {
@@ -144,11 +148,12 @@ std::vector<Location> bfs(const Mountain& graph, Location start, Location end)
 
     assert(steps_from.count(end) != 0);
 
+    std::unordered_set<Location, LocationHash> start_set {starts.begin(), starts.end()};
     std::vector<Location> path;
     path.reserve(visit_nodes.size());
 
     path.push_back(end);
-    while (path.back() != start)
+    while (start_set.count(path.back()) == 0)
     {
         path.push_back(steps_from[path.back()]);
     }
@@ -180,7 +185,7 @@ void day_12(std::istream& in, std::ostream& out)
     Location start, end;
     std::tie(m, start, end) = read_input(in);
 
-    auto path = bfs(m, start, end);
+    auto path = bfs(m, {start}, end);
     print_solution(m, path);
 
     out << path.size() - 1;
