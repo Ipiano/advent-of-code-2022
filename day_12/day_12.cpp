@@ -193,6 +193,22 @@ void day_12(std::istream& in, std::ostream& out)
 
 void day_12_adv(std::istream& in, std::ostream& out)
 {
+    using namespace day_12_impl;
+
+    Mountain m;
+    Location start, end;
+    std::tie(m, start, end) = read_input(in);
+
+    std::vector<Location> starts;
+    for (size_t i = 0; i < m.size(); ++i)
+        for (size_t j = 0; j < m[i].size(); ++j)
+            if (m[i][j] == 'a')
+                starts.push_back({i, j});
+
+    auto path = bfs(m, starts, end);
+    print_solution(m, path);
+
+    out << path.size() - 1;
 }
 
 TEST(Day12, Example)
@@ -211,4 +227,22 @@ abdefghi
     day_12(ss_in, ss_out);
 
     EXPECT_EQ(ss_out.str(), "31");
+}
+
+TEST(Day12, ExampleAdvanced)
+{
+    const static char* INPUT_DATA = R"in(
+Sabqponm
+abcryxxl
+accszExk
+acctuvwj
+abdefghi
+)in";
+
+    std::stringstream ss_in, ss_out;
+    ss_in << INPUT_DATA;
+
+    day_12_adv(ss_in, ss_out);
+
+    EXPECT_EQ(ss_out.str(), "29");
 }
