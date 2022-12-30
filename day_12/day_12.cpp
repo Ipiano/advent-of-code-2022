@@ -6,11 +6,11 @@
 namespace day_12_impl
 {
 using Mountain = std::vector<std::string>;
-using Location = std::pair<size_t, size_t>; // y, x
+using Location = std::pair<int, int>; // y, x
 
 struct LocationHash
 {
-    size_t operator()(Location l) const { return std::hash<size_t>()((l.first << (sizeof(size_t) / 2)) | l.second); }
+    size_t operator()(Location l) const { return std::hash<size_t>()((size_t(l.first) << (sizeof(size_t) / 2)) | l.second); }
 };
 
 Location operator+(Location l, Location r)
